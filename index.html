@@ -1,0 +1,45 @@
+<html>
+	<head>
+		<title>Free Online Sprite Sheet Decomposer</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta charset="UTF-8">
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<meta name="description" content="Cut sprite sheet animation pictures into piece. This component will help you decompose your sprites into individual frames.">
+		<meta name="author" content="jmsliu.com">
+		<!-- JQuery -->
+		<script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+		
+		<!-- Bootstrap -->
+		<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
+		<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap-theme.min.css">
+	</head>
+	<body>
+
+	<div class="container" style="max-width: 730px;">
+	  <div class="header" style="margin-bottom: 30px;">
+        <h3 class="text-muted">Free Sprite Sheet Decomposer</h3>
+      </div>
+	
+	
+		<form role="form" method="post" enctype="multipart/form-data" action="spritedecomposer.php" id="form">
+			<div class="form-group">
+				<label for="width">Frame Width (pixel):</label>
+				<input type="text" class="form-control" name="width" id="width" value="">
+			</div>
+			
+			<div class="form-group">
+				<label for="height">Frame Height (pixel):</label>
+				<input type="text" class="form-control" name="height" id="height" value="">
+			</div>
+			
+			<div class="form-group">
+				<label for="file">Image File (only for .PNG):</label>
+				<input type="file" id="file" name="file">
+			</div>
+			
+		
+			<button type="submit" class="btn btn-primary">Decompose</button>
+		</form>
+	</div>
+	</body>
+</html>
