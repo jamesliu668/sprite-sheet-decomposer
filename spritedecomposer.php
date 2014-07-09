@@ -44,7 +44,7 @@ else
 				
 				imagecopy($desimage, $srcimage, 0, 0, $col * $frameWidth, $row * $frameHeight, $frameWidth, $frameHeight);
 				
-				$file = $frameNumber.".png";
+				$file = "./result/".$frameNumber.".png";
 				imagepng($desimage, $file);
 				imagedestroy($desimage);
 				echo "<img src=\"".$file."\"/>";
