@@ -1,5 +1,6 @@
 <?php
 /**
+ * WARNING - This version is forked from its original owner :
  * @copyright	Copyright © 2014 - All rights reserved.
  * @license     GNU General Public License version 2 or later; see LICENSE
  * @author		James Liu
@@ -9,12 +10,12 @@
  
 if(empty($_POST["width"]) || empty($_POST["height"]))
 {
-	echo "please give the frame width and height";
+	echo "Please indicate the frame width and height";
 }
 else
 {
 	$msg = validUploadFile($_FILES["file"]);
-	if( $msg == "valid")
+	if ($msg)
 	{
 		//move_uploaded_file($_FILES["file"]["tmp_name"], $_FILES["file"]["name"]);
 		$frameWidth = $_POST["width"];
@@ -24,7 +25,10 @@ else
 		$startY = 0;
 		
 		list($width, $height) = getimagesize($_FILES["file"]["tmp_name"]);
-		$srcimage = imagecreatefrompng($_FILES["file"]["tmp_name"]);
+
+		$isPNG = ($_FILES["file"]["type"] == "image/png");	// The image format can either be PNG or JPEG
+		
+		$srcimage = ($isPNG) ? imagecreatefrompng($_FILES["file"]["tmp_name"]) : imagecreatefromjpeg($_FILES["file"]["tmp_name"]);
 		
 		$usedColor = getColorCollection($srcimage, $width, $height);
 		$colorInt = findNotUsedColor($usedColor);
@@ -39,15 +43,19 @@ else
 			{
 				$desimage = imagecreatetruecolor($frameWidth, $frameHeight);
 				$transparent_new = ImageColorAllocate($desimage, $r, $g, $b);
-				$transparent_new_index = ImageColorTransparent( $desimage, $transparent_new );
+				$transparent_new_index = ImageColorTransparent($desimage, $transparent_new);
 				ImageFill( $desimage, 0, 0, $transparent_new_index );
 				
 				imagecopy($desimage, $srcimage, 0, 0, $col * $frameWidth, $row * $frameHeight, $frameWidth, $frameHeight);
 				
-				$file = "./result/".$frameNumber.".png";
-				imagepng($desimage, $file);
+				$strFormat = ($isPNG) ? ".png" : ".jpeg";
+				$file = "./result/".$frameNumber.$strFormat;
+				if ($isPNG)
+					imagepng($desimage, $file);
+				else
+					imagejpeg($desimage, $file);
 				imagedestroy($desimage);
-				echo "<img src=\"".$file."\"/>";
+				echo "<img src=\"".$file."\"/><br />";
 				
 				$frameNumber++;
 			}
@@ -55,7 +63,7 @@ else
 	}
 	else
 	{
-		echo "invalid";
+		echo "Invalid";
 	}
 }
 
@@ -113,7 +121,7 @@ function validUploadFile($file)
 		return "File is too big!";
 	}
 	
-	return "valid";
+	return true;
 }
 
 function validImages()
