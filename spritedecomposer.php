@@ -27,14 +27,7 @@ else
 		list($width, $height) = getimagesize($_FILES["file"]["tmp_name"]);
 
 		$isPNG = ($_FILES["file"]["type"] == "image/png");	// The image format can either be PNG or JPEG
-		
 		$srcimage = ($isPNG) ? imagecreatefrompng($_FILES["file"]["tmp_name"]) : imagecreatefromjpeg($_FILES["file"]["tmp_name"]);
-		
-		$usedColor = getColorCollection($srcimage, $width, $height);
-		$colorInt = findNotUsedColor($usedColor);
-		$r = ($colorInt >> 16) & 0xFF;
-		$g = ($colorInt >> 8) & 0xFF;
-		$b = $colorInt & 0xFF;
 		
 		$frameNumber = 0;
 		for($row = 0; $row < $height / $frameHeight; $row++)
@@ -42,12 +35,10 @@ else
 			for($col = 0; $col < $width / $frameWidth; $col++)
 			{
 				$desimage = imagecreatetruecolor($frameWidth, $frameHeight);
-				$transparent_new = ImageColorAllocate($desimage, $r, $g, $b);
-				$transparent_new_index = ImageColorTransparent($desimage, $transparent_new);
-				ImageFill( $desimage, 0, 0, $transparent_new_index );
-				
-				imagecopy($desimage, $srcimage, 0, 0, $col * $frameWidth, $row * $frameHeight, $frameWidth, $frameHeight);
-				
+				imagealphablending($desimage, false);
+				imagesavealpha($desimage, true);
+				copyPixelsToImage($srcimage, $desimage, $col * $frameWidth, $row * $frameHeight, $frameWidth, $frameHeight);
+
 				$strFormat = ($isPNG) ? ".png" : ".jpeg";
 				$file = "./result/".$frameNumber.$strFormat;
 				if ($isPNG)
@@ -67,32 +58,22 @@ else
 	}
 }
 
-function getColorCollection($imageResource, $width, $height)
-{
-	$totalPixels = $width * $height;
-	$colorCollection = array();
-	for($i = 0; $i < $width; $i++)
-	{
-		for($j = 0; $j < $height; $j++)
-		{
-			$rgb = ImageColorAt($imageResource, $i, $j);
-			$r = ($rgb >> 16) & 0xFF;
-			$g = ($rgb >> 8) & 0xFF;
-			$b = $rgb & 0xFF;
-			$colorCollection[$rgb] = $rgb;
-		}
-	}
+function explodeImage($srcFileName, $width, $height, $desFolder) {
 	
-	return $colorCollection;
 }
 
-function findNotUsedColor($colorCollection)
-{
-	for($i = 0; $i < 0xFFFFFF; $i++)
-	{
-		if(!in_array($i, $colorCollection))
-		{
-			return $i;
+function copyPixelsToImage($soruce, $destination, $startX, $startY, $width, $height) {
+	for($i = 0; $i < $width; $i++) {
+		for($j = 0; $j < $height; $j++) {
+			$sourcePosX = $startX + $i;
+			$sourcePoxY = $startY + $j;
+			$rgba = ImageColorAt($soruce, $sourcePosX, $sourcePoxY);
+			$a = ($rgba >> 24) & 0x7F;
+			$r = ($rgba >> 16) & 0xFF;
+			$g = ($rgba >> 8) & 0xFF;
+			$b = $rgba & 0xFF;
+			imagecolorallocatealpha($destination, $r, $g, $b, $a);
+			imagesetpixel($destination, $i, $j, $rgba);
 		}
 	}
 }
