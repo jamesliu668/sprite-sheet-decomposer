@@ -24,32 +24,9 @@ else
 		$startX = 0;
 		$startY = 0;
 		
-		list($width, $height) = getimagesize($_FILES["file"]["tmp_name"]);
-
-		$isPNG = ($_FILES["file"]["type"] == "image/png");	// The image format can either be PNG or JPEG
-		$srcimage = ($isPNG) ? imagecreatefrompng($_FILES["file"]["tmp_name"]) : imagecreatefromjpeg($_FILES["file"]["tmp_name"]);
-		
-		$frameNumber = 0;
-		for($row = 0; $row < $height / $frameHeight; $row++)
-		{
-			for($col = 0; $col < $width / $frameWidth; $col++)
-			{
-				$desimage = imagecreatetruecolor($frameWidth, $frameHeight);
-				imagealphablending($desimage, false);
-				imagesavealpha($desimage, true);
-				copyPixelsToImage($srcimage, $desimage, $col * $frameWidth, $row * $frameHeight, $frameWidth, $frameHeight);
-
-				$strFormat = ($isPNG) ? ".png" : ".jpeg";
-				$file = "./result/".$frameNumber.$strFormat;
-				if ($isPNG)
-					imagepng($desimage, $file);
-				else
-					imagejpeg($desimage, $file);
-				imagedestroy($desimage);
-				echo "<img src=\"".$file."\"/><br />";
-				
-				$frameNumber++;
-			}
+		$result = explodeImage($_FILES["file"]["tmp_name"], $_FILES["file"]["type"], $frameWidth, $frameHeight, "./result/");
+		foreach($result as $v) {
+			echo "<img src=\"".$v."\"/><br />";
 		}
 	}
 	else
@@ -58,8 +35,32 @@ else
 	}
 }
 
-function explodeImage($srcFileName, $width, $height, $desFolder) {
-	
+function explodeImage($srcFilePath, $srcFileType, $frameWidth, $frameHeight, $desFolder) {
+	$result = array();
+	list($width, $height) = getimagesize($srcFilePath);
+	$isPNG = ($srcFileType == "image/png");	// The image format can either be PNG or JPEG
+	$srcimage = ($isPNG) ? imagecreatefrompng($srcFilePath) : imagecreatefromjpeg($srcFilePath);
+	$frameNumber = 0;
+	for($row = 0; $row < $height / $frameHeight; $row++) {
+		for($col = 0; $col < $width / $frameWidth; $col++) {
+			$desimage = imagecreatetruecolor($frameWidth, $frameHeight);
+			imagealphablending($desimage, false);
+			imagesavealpha($desimage, true);
+			copyPixelsToImage($srcimage, $desimage, $col * $frameWidth, $row * $frameHeight, $frameWidth, $frameHeight);
+
+			$strFormat = ($isPNG) ? ".png" : ".jpeg";
+			$file = "./result/".$frameNumber.$strFormat;
+			if ($isPNG)
+				imagepng($desimage, $file);
+			else
+				imagejpeg($desimage, $file);
+			imagedestroy($desimage);
+			$result[] = $file;
+			$frameNumber++;
+		}
+	}
+
+	return $result;
 }
 
 function copyPixelsToImage($soruce, $destination, $startX, $startY, $width, $height) {
